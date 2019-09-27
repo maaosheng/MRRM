@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <title>Title</title>
+    <style>
+        body{
+            margin: 0;
+        }
+        .hy{
+            margin-top: 50px;
+        }
+        td{
+            text-align: center;
+        }
+        .active{
+            background-color: red!important;
+            color:white;
+            opacity: 0.3;
+        }
+        .postive1{
+            background-color: #46b8da!important;
+            color: white;
+        }
+        .postive2{
+            background-color: #46b8da;
+            opacity: 0.4;
+            color: white;
+        }
+
+    </style>
+</head>
+<body>
+<h1>会议室预订</h1>
+<div class="hy">
+    {% csrf_token %}
+    <table class="table table-hover table-striped table-bordered">
+        <thead>
+            <tr>
+                <td style="font-weight: bold;font-size: 15px;text-align: center">会议室/时间</td>
+                {% for header in book_choices  %}
+                    <td style="font-weight: bold;font-size: 15px;text-align: center">{{ header.1 }}</td>
+                {% endfor %}
+                </tr>
+        </thead>
+        <tbody>
+           {{ htmls|safe }}
+        </tbody>
+    </table>
+    <p class="pull-right"><a class="btn btn-primary" id="bt">提交</a></p>
+</div>
+<script src="/static/jquery-3.3.1.js"></script>
+<script src="/static/bootstrap/js/bootstrap.min.js"></script>
+<script>
+    var POST_DIC={
+        ADD:{},
+        DELETE:{}
+    };
+
+    $('td').on('click',function () {
+        var room_id = $(this).attr('room');
+        var book_id =$(this).attr('book');
+        if ($(this).hasClass('active')){
+        }else{
+            if ($(this).hasClass('postive1')){
+                $(this).removeClass('postive1').empty();
+                if (POST_DIC.DELETE[room_id]){
+                    POST_DIC.DELETE[room_id].push(book_id)
+                }else{
+                      POST_DIC.DELETE[room_id]=[book_id,]
+                }
+            }else if($(this).hasClass('postive2')){
+                $(this).removeClass('postive2');
+                POST_DIC.ADD[room_id].pop()
+            }else{
+                $(this).addClass('postive2');
+                if(POST_DIC.ADD[room_id]){
+                    POST_DIC.ADD[room_id].push(book_id)
+                }else{
+                     POST_DIC.ADD[room_id]=[book_id,]
+                }
+            }
+        }
+        console.log(POST_DIC)
+    });
+    $('#bt').click('click',function () {
+        $.ajax({
+            url:'/ajax_book/',
+            type:'POST',
+            dataType:'JSON',
+            data:{
+                kss:'123',
+                data_dict: JSON.stringify(POST_DIC),
+                csrfmiddlewaretoken: $("[name='csrfmiddlewaretoken']").val()
+
+            },
+            success:function (data) {
+                console.log(data.msg)
+                location.href=data.msg
+            }
+
+        })
+    })
+
+</script>
+</body>
+</html>
